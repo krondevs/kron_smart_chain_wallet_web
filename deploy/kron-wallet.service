@@ -1,0 +1,31 @@
+[Unit]
+Description=Kron Wallet Web API
+After=network-online.target krond-web.service
+Wants=network-online.target
+Requires=krond-web.service
+
+[Service]
+Type=simple
+User=kronwallet
+Group=kronwallet
+WorkingDirectory=/opt/kron-wallet
+ExecStart=/opt/kron-wallet/webwallet -config /etc/kron-wallet/settings.json
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/kron-wallet
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,30 @@
+[Unit]
+Description=Kron Smart Chain dedicated web-wallet node
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=kronweb
+Group=kronweb
+ExecStart=/opt/kron/krond -datadir=/var/lib/kron-web -conf=/etc/kron/kron-web.conf
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=120
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/kron-web
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+
+[Install]
+WantedBy=multi-user.target

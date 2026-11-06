@@ -1,0 +1,18 @@
+wallet.example.com {
+    encode zstd gzip
+
+    # The Go app sets CSP, X-Frame-Options, Referrer-Policy, etc.
+    # Caddy adds TLS and HSTS.
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    }
+
+    reverse_proxy 127.0.0.1:8080 {
+        header_up X-Real-IP {remote_host}
+    }
+
+    log {
+        output file /var/log/caddy/kron-wallet.log
+        format json
+    }
+}

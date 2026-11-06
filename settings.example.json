@@ -1,0 +1,48 @@
+{
+  "environment": "development",
+  "http_addr": ":8080",
+  "public_url": "http://localhost:8080",
+  "trusted_proxies": [
+    "127.0.0.1",
+    "::1"
+  ],
+  "data_dir": "./data",
+  "db_path": "./data/webwallet.db",
+
+  "rpc_url": "http://127.0.0.1:20893",
+  "rpc_user": "webwallet",
+  "rpc_password": "CAMBIAR-POR-UNA-CLAVE-LARGA",
+  "rpc_timeout": "30s",
+
+  "master_key": "",
+  "master_key_file": "",
+
+  "session_cookie_name": "ksc_session",
+  "csrf_cookie_name": "ksc_csrf",
+  "cookie_secure": false,
+  "session_ttl": "12h",
+  "mfa_reverify_after": "10m",
+  "wallet_unlock_seconds": 60,
+
+  "registration_enabled": true,
+  "require_totp": false,
+  "admin_username": "",
+  "admin_password": "",
+  "metrics_token": "",
+
+  "default_per_tx_limit": "100",
+  "default_daily_limit": "1000",
+  "max_accounts_per_ip": 5,
+
+  "max_loaded_wallets": 100,
+  "wallet_load_on_startup": false,
+
+  "max_contract_gas": 2500000,
+  "max_gas_price_sat": 10000,
+  "default_gas_limit": 250000,
+  "default_create_gas": 2500000,
+  "ksc_decimals": 8,
+  "wallet_prefix": "u_",
+  "totp_issuer": "Kron Smart Chain Wallet",
+  "wallet_backup_dir": ""
+}
