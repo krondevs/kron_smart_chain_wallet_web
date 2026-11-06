@@ -1,0 +1,123 @@
+# Kron Wallet API — LLM Guide
+
+This API operates a custodial Kron Smart Chain wallet. Authenticate every
+request with an API key created in the wallet UI.
+
+Base URL: your wallet deployment origin, for example https://wallet.example.com
+
+## Authentication
+
+Send either:
+
+    Authorization: Bearer ksc_<public_id>_<secret>
+
+or:
+
+    X-API-Key: ksc_<public_id>_<secret>
+
+API keys do not use TOTP/2FA. They have full access to the user's existing
+wallet. Keep the key secret. Keys expire and can be revoked.
+
+## Rate limit
+
+Each API key is limited to 30 requests per 60 seconds. Responses include:
+
+    X-RateLimit-Limit: 30
+    X-RateLimit-Remaining: <n>
+    X-RateLimit-Reset: <seconds>
+
+HTTP 429 means the limit was exceeded. Wait for Retry-After seconds.
+
+## Amounts
+
+- KSC amounts are decimal strings with at most 8 decimals: "0.01", "12.5".
+- Token amounts are human decimal strings: "0.0014", not raw integers.
+- Contract addresses are 40 hex characters, with or without 0x.
+- Wallet addresses are Kron P2PKH strings beginning with K... on mainnet.
+
+## Writes and idempotency
+
+Every POST/DELETE that creates a transaction requires:
+
+    Idempotency-Key: <uuid>
+
+Generate a new UUID per operation. Reusing the same key returns the previous
+operation or a conflict; it never creates a second transaction.
+
+## Quick start
+
+Identify the key and wallet:
+
+    curl -H "Authorization: Bearer $KSC_API_KEY" \
+      https://wallet.example.com/api/v1/app/me
+
+Read balances:
+
+    curl -H "Authorization: Bearer $KSC_API_KEY" \
+      https://wallet.example.com/api/v1/app/wallet
+
+Send KSC:
+
+    curl -X POST \
+      -H "Authorization: Bearer $KSC_API_KEY" \
+      -H "Content-Type: application/json" \
+      -H "Idempotency-Key: 6fcb0c47-7a7c-4f4a-a4f7-3b1e6f6a9c10" \
+      -d '{"address":"K...","amount":"0.01"}' \
+      https://wallet.example.com/api/v1/app/wallet/send
+
+Add a KRC20/QRC20 token:
+
+    curl -X POST \
+      -H "Authorization: Bearer $KSC_API_KEY" \
+      -H "Content-Type: application/json" \
+      -H "Idempotency-Key: <uuid>" \
+      -d '{"contract":"f996498457a417fee934db11e10e814f1a866b8b"}' \
+      https://wallet.example.com/api/v1/app/tokens
+
+Transfer a token:
+
+    curl -X POST \
+      -H "Authorization: Bearer $KSC_API_KEY" \
+      -H "Content-Type: application/json" \
+      -H "Idempotency-Key: <uuid>" \
+      -d '{"to":"K...","amount":"0.0014"}' \
+      https://wallet.example.com/api/v1/app/tokens/<contract>/transfer
+
+Read a contract:
+
+    curl -X POST \
+      -H "Authorization: Bearer $KSC_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"address":"<contract>","method":"balanceOf(address)","args":["K..."]}' \
+      https://wallet.example.com/api/v1/app/contracts/read
+
+## Main endpoints
+
+- GET  /api/v1/app/me
+- GET  /api/v1/app/wallet
+- GET  /api/v1/app/wallet/address
+- GET  /api/v1/app/wallet/transactions
+- POST /api/v1/app/wallet/send
+- POST /api/v1/app/wallet/consolidate
+- POST /api/v1/app/wallet/prepare-gas
+- GET/POST /api/v1/app/tokens
+- POST /api/v1/app/tokens/{contract}/transfer
+- POST /api/v1/app/tokens/{contract}/approve
+- POST /api/v1/app/tokens/{contract}/transfer-from
+- POST /api/v1/app/tokens/{contract}/burn
+- POST /api/v1/app/tokens/{contract}/burn-from
+- GET/POST /api/v1/app/contracts
+- POST /api/v1/app/contracts/read
+- POST /api/v1/app/contracts/write
+- POST /api/v1/app/contracts/deploy
+- GET/POST /api/v1/app/address-book
+
+The full machine-readable specification is at /api/v1/openapi.json.
+
+## Error format
+
+    {"error":{"code":"invalid_amount","message":"..."}}
+
+Common codes: unauthorized, api_key_required, api_key_invalid,
+api_key_expired, rate_limited, invalid_amount, invalid_address,
+gas_not_ready, idempotency_key_required, rpc_error.
